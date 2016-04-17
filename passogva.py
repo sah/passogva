@@ -35,11 +35,18 @@
 
 import random as _py_random
 
+random = _py_random  # backup plan
 # Potentially overkill, use system random numbers
+# Nested exception catching for older Python version
 try:
-    random = _py_random.SystemRandom()
-except NotImplementedError:
-    random = _py_random
+    try:
+        random = _py_random.SystemRandom()
+    except NotImplementedError:
+        # not available
+        pass
+except AttributeError:
+    # Pre Python 2.4
+    pass
 
 MIN_LENGTH_PASSWORD = 6
 MAX_LENGTH_PASSWORD = 14
