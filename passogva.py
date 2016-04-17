@@ -33,7 +33,13 @@
 # implementation does not use DES.  Instead, it uses Python's
 # random.randint() function.
 
-import random
+import random as _py_random
+
+# Potentially overkill, use system random numbers
+try:
+    random = _py_random.SystemRandom()
+except NotImplementedError:
+    random = _py_random
 
 MIN_LENGTH_PASSWORD = 6
 MAX_LENGTH_PASSWORD = 14
