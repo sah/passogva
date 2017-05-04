@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 # Passogva 1.0 - A random password generator based on FIPS-181
 #
@@ -33,7 +35,9 @@
 # implementation does not use DES.  Instead, it uses Python's
 # random.randint() function.
 
+import os
 import random as _py_random
+import sys
 
 random = _py_random  # backup plan
 # Potentially overkill, use system random numbers
@@ -2244,6 +2248,26 @@ def _illegal_placement(units):
 
     return failure
 
-if __name__ == "__main__":
-    word, hyphenated_word = generate_password(6, 8)
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
+    min_len, max_len = (6, 8)
+    try:
+        try:
+            # poor mans argument processing
+            min_len = int(argv[1])
+            max_len = int(argv[2])
+        except IndexError:
+            pass
+    except ValueError:
+        print('using %r' % ((min_len, max_len),))
+    max_len = max(max_len, min_len)
+
+    word, hyphenated_word = generate_password(min_len, max_len)
     print("%s (%s)" % (word, hyphenated_word))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
