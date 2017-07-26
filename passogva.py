@@ -36,21 +36,30 @@
 # random.randint() function.
 
 import os
-import random as _py_random
+try:
+    from secrets import choice, randbelow  # Python 3.6 module
+except ImportError:
+    import random as _py_random
+    random = _py_random  # backup(, backup) plan
+
+    # Potentially overkill, use system random numbers
+    # Nested exception catching for older Python version
+    try:
+        try:
+            random = _py_random.SystemRandom()
+        except NotImplementedError:
+            # not available
+            pass
+    except AttributeError:
+        # Pre Python 2.4
+        pass
+
+    def randbelow(x):
+        return random.randint(0, x)
+    choice = random.choice
+
 import sys
 
-random = _py_random  # backup plan
-# Potentially overkill, use system random numbers
-# Nested exception catching for older Python version
-try:
-    try:
-        random = _py_random.SystemRandom()
-    except NotImplementedError:
-        # not available
-        pass
-except AttributeError:
-    # Pre Python 2.4
-    pass
 
 MIN_LENGTH_PASSWORD = 6
 MAX_LENGTH_PASSWORD = 14
@@ -1388,7 +1397,7 @@ def generate_password(minlen = MIN_LENGTH_PASSWORD,
 
     word = ''
     for i in range(MAX_UNACCEPTABLE):
-        results = _random_word(random.randint(minlen, maxlen))
+        results = _random_word(choice(range(minlen, maxlen + 1)))
         word = results[0]
         hyphenated_word = results[1]
         if (word != ''):
@@ -1412,7 +1421,7 @@ def random_element(ar):
         keys = ar.keys()
     except:
         keys = range(len(ar))
-    return ar[ keys[random.randint(0, len(keys) - 1)] ]
+    return ar[ keys[randbelow(len(keys) - 1)] ]
 
 
 
