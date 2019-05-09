@@ -1455,6 +1455,7 @@ def _random_word(pwlen):
         #
 
         new_syllable, syllable_units, saved_pair = get_syllable(pwlen - len(word), saved_pair)
+        new_syllable = new_syllable.capitalize()  # capitalize each syllable
         syllable_units = list(syllable_units)
 
         #
@@ -2274,6 +2275,10 @@ def main(argv=None):
     max_len = max(max_len, min_len)
 
     word, hyphenated_word = generate_password(min_len, max_len)
+    print("%s (%s)" % (word, hyphenated_word))
+    word, hyphenated_word = word.lower(), hyphenated_word.lower()
+    print("%s (%s)" % (word, hyphenated_word))
+    word, hyphenated_word = word.capitalize(), hyphenated_word.capitalize()
     print("%s (%s)" % (word, hyphenated_word))
     return 0
 
