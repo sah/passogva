@@ -58,6 +58,7 @@ except ImportError:
         return random.randint(0, x)
     choice = random.choice
 
+import string
 import sys
 
 
@@ -2258,6 +2259,17 @@ def _illegal_placement(units):
 
     return failure
 
+
+def stupid_extra_stuff():
+    """return a random upper case letter, digit and "special character" which some password policies now require
+    returns them in order (not yet randomized, may never be....)
+    """
+    special_characters = []
+    special_characters.append(choice(string.ascii_uppercase))
+    special_characters.append(choice(string.digits))
+    special_characters.append(choice(string.punctuation))
+    return ''.join(special_characters)
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -2280,6 +2292,9 @@ def main(argv=None):
     print("%s (%s)" % (word, hyphenated_word))
     word, hyphenated_word = word.capitalize(), hyphenated_word.capitalize()
     print("%s (%s)" % (word, hyphenated_word))
+    dumb_policy_characters = stupid_extra_stuff()
+    print("%s" % (dumb_policy_characters,))
+    print("%s%s (%s%s)" % (word, dumb_policy_characters, hyphenated_word, dumb_policy_characters))
     return 0
 
 
