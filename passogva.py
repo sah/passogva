@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 # Passogva 1.0 - A random password generator based on FIPS-181
 #
@@ -33,7 +35,32 @@
 # implementation does not use DES.  Instead, it uses Python's
 # random.randint() function.
 
-import random
+import os
+try:
+    from secrets import choice, randbelow  # Python 3.6 module
+except ImportError:
+    import random as _py_random
+    random = _py_random  # backup(, backup) plan
+
+    # Potentially overkill, use system random numbers
+    # Nested exception catching for older Python version
+    try:
+        try:
+            random = _py_random.SystemRandom()
+        except NotImplementedError:
+            # not available
+            pass
+    except AttributeError:
+        # Pre Python 2.4
+        pass
+
+    def randbelow(x):
+        return random.randint(0, x)
+    choice = random.choice
+
+import string
+import sys
+
 
 MIN_LENGTH_PASSWORD = 6
 MAX_LENGTH_PASSWORD = 14
@@ -1357,7 +1384,7 @@ def generate_password(minlen = MIN_LENGTH_PASSWORD,
                       maxlen = MAX_LENGTH_PASSWORD):
 
     if (minlen > maxlen):
-        print "minlen minlen is greater than maxlen maxlen\n"
+        print("minlen minlen is greater than maxlen maxlen\n")
         return ('','')
 
 
@@ -1371,7 +1398,7 @@ def generate_password(minlen = MIN_LENGTH_PASSWORD,
 
     word = ''
     for i in range(MAX_UNACCEPTABLE):
-        results = _random_word(random.randint(minlen, maxlen))
+        results = _random_word(choice(range(minlen, maxlen + 1)))
         word = results[0]
         hyphenated_word = results[1]
         if (word != ''):
@@ -1379,7 +1406,7 @@ def generate_password(minlen = MIN_LENGTH_PASSWORD,
 
 
     if (word == "" and (minlen > 0)):
-        print "failed to generate an acceptable random password.\n"
+        print("failed to generate an acceptable random password.\n")
         return ('','')
 
 
@@ -1395,7 +1422,7 @@ def random_element(ar):
         keys = ar.keys()
     except:
         keys = range(len(ar))
-    return ar[ keys[random.randint(0, len(keys) - 1)] ]
+    return ar[ keys[randbelow(len(keys) - 1)] ]
 
 
 
@@ -1429,6 +1456,8 @@ def _random_word(pwlen):
         #
 
         new_syllable, syllable_units, saved_pair = get_syllable(pwlen - len(word), saved_pair)
+        new_syllable = new_syllable.capitalize()  # capitalize each syllable
+        syllable_units = list(syllable_units)
 
         #
         # Append the syllable units to the word units.
@@ -2230,6 +2259,44 @@ def _illegal_placement(units):
 
     return failure
 
+
+def stupid_extra_stuff():
+    """return a random upper case letter, digit and "special character" which some password policies now require
+    returns them in order (not yet randomized, may never be....)
+    """
+    special_characters = []
+    special_characters.append(choice(string.ascii_uppercase))
+    special_characters.append(choice(string.digits))
+    special_characters.append(choice(string.punctuation))
+    return ''.join(special_characters)
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
+    min_len, max_len = (6, 8)
+    try:
+        try:
+            # poor mans argument processing
+            min_len = int(argv[1])
+            max_len = int(argv[2])
+        except IndexError:
+            pass
+    except ValueError:
+        print('using %r' % ((min_len, max_len),))
+    max_len = max(max_len, min_len)
+
+    word, hyphenated_word = generate_password(min_len, max_len)
+    print("%s (%s)" % (word, hyphenated_word))
+    word, hyphenated_word = word.lower(), hyphenated_word.lower()
+    print("%s (%s)" % (word, hyphenated_word))
+    word, hyphenated_word = word.capitalize(), hyphenated_word.capitalize()
+    print("%s (%s)" % (word, hyphenated_word))
+    dumb_policy_characters = stupid_extra_stuff()
+    print("%s" % (dumb_policy_characters,))
+    print("%s%s (%s%s)" % (word, dumb_policy_characters, hyphenated_word, dumb_policy_characters))
+    return 0
+
+
 if __name__ == "__main__":
-    word, hyphenated_word = generate_password(6, 8)
-    print "%s (%s)" % (word, hyphenated_word)
+    sys.exit(main())
